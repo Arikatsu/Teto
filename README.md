@@ -1,8 +1,8 @@
-# Teto - A 32-bit CPU Emulator
+# Teto
 
-A minimal CPU emulator that implements a simplified x86-like instruction set.
+A minimal 32-bit CPU emulator that implements a simplified fixed-width x86-like instruction set.
 
-## Architecture
+## Architecture (currently)
 
 - **Memory**: 64KB addressable memory space
 - **Program Counter**: Starts at offset 0x200
@@ -20,13 +20,15 @@ A minimal CPU emulator that implements a simplified x86-like instruction set.
 
 Each instruction is 32 bits (4 bytes) with the following layout:
 
-## Instruction Set
+```
+0        6       9      10                32 (BIT)
++--------+-------+------+--------------------+
+| Opcode |  Reg  | Mode |      Operand       |
++--------+-------+------+--------------------+
 
-| Opcode | Mnemonic | Description |
-|--------|----------|-------------|
-| 0x01   | MOV reg, imm | Load immediate value into register |
-| 0x02   | ADD reg, imm | Add immediate value to register |
-| 0x03   | ADD reg, reg | Add value from source register to destination register |
-| 0xFF   | HLT         | Halt the CPU |
+Opcode  = 6 bits  (Operation to execute)  
+Reg     = 3 bits  (Target register)  
+Mode    = 1 bit   (0 = Immediate, 1 = Register)  
+Operand = 22 bits (Immediate value or register address)
+```
 
-#### P.S. I WILL ADD A LOT MORE INSTRUCTIONS AND FEATURES IN THE FUTURE
