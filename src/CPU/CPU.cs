@@ -70,6 +70,22 @@ public class CPU
                 _registers[reg] /= mode == 0 ? value : _registers[value];
                 break;
             
+            case Opcode.MOD:
+                _registers[reg] %= mode == 0 ? value : _registers[value];
+                break;
+            
+            case Opcode.INC:
+                _registers[reg]++;
+                break;
+            
+            case Opcode.DEC:
+                _registers[reg]--;
+                break;
+            
+            case Opcode.NEG:
+                _registers[reg] = ~_registers[reg] + 1;
+                break;
+            
             case Opcode.AND:
                 _registers[reg] &= mode == 0 ? value : _registers[value];
                 break;
