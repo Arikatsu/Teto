@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+
 using Teto;
+using Teto.CPU;
 
-var program = new byte[]
-{
-    0x01, 0x00, 0x05, 0x00, // MOV R0, 5
-    0x01, 0x01, 0x03, 0x00, // MOV R1, 3
-    0x03, 0x00, 0x01, 0x00, // ADD R0, R1
-    0xFF, 0x00, 0x00, 0x00  // HLT
-};
+var program = new List<byte>();
+program.AddRange(Utils.EncodeInstruction(0x01, 0x0, 0x0, 0x5));
+program.AddRange(Utils.EncodeInstruction(0x01, 0x1, 0x0, 0x3));
+program.AddRange(Utils.EncodeInstruction(0x0A, 0x0, 0x1, 0x1));
+program.AddRange(Utils.EncodeInstruction(0x2C, 0x0, 0x0, 0x0));
 
-Memory.LoadProgram(program);
+Memory.LoadProgram(program.ToArray());
 
 CPU cpu = new();
 cpu.Run();
