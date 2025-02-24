@@ -1,13 +1,13 @@
 ﻿using System;
 using Teto;
 
-var program = new byte[]
-{
-    0x01, 0x00, 0x05, 0x00, // MOV R0, 5
-    0x01, 0x01, 0x03, 0x00, // MOV R1, 3
-    0x03, 0x00, 0x01, 0x00, // ADD R0, R1
-    0xFF, 0x00, 0x00, 0x00  // HLT
-};
+var program = new byte[8];
+
+Utils.WriteInstructionToByteArray(program, 0, Utils.EncodeInstruction(Opcode.MOV, 0, 0, 42));
+Utils.WriteInstructionToByteArray(program, 4, Utils.EncodeInstruction(Opcode.MOV, 1, 0, 24));
+Utils.WriteInstructionToByteArray(program, 8, Utils.EncodeInstruction(Opcode.ADD, 0, 0, 1));
+Utils.WriteInstructionToByteArray(program, 12, Utils.EncodeInstruction(Opcode.SUB, 1, 0, 1));
+Utils.WriteInstructionToByteArray(program, 16, Utils.EncodeInstruction(Opcode.HLT, 0, 0, 0));
 
 Memory.LoadProgram(program);
 
