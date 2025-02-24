@@ -4,6 +4,6 @@
 	<s:Boolean x:Key="/Default/Environment/UnitTesting/CreateUnitTestDialog/ShowAdvancedOptions/@EntryValue">True</s:Boolean>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d5dda112_002D4935_002D476c_002Da0bc_002D719bfc3e7707/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="CpuTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::2B4B0D80-7B84-443C-A047-C6759B6A35FB::net9.0::Teto.Tests.CpuTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::5086200C-FB8E-4644-81CB-31F6FEC23B92::net9.0::Teto.Tests.CPUTest.TestCPU&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
