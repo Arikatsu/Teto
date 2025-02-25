@@ -1,11 +1,13 @@
 using System;
 
-namespace Teto.CPU;
+using Teto.MMU;
 
-public class CPU
+namespace Teto.Proc;
+
+public class CPU(RAM ram)
 {
     private readonly uint[] _registers = new uint[8];
-    private uint _pc = 0x200;
+    private uint _pc = (uint)Segments.TEXT_START;
     private uint _flags = 0;
     
     public uint GetRegister(uint index) => _registers[index];
@@ -21,10 +23,10 @@ public class CPU
     
     private void Fetch()
     {
-        var instr = Memory.Read(_pc) |
-                    (uint)(Memory.Read(_pc + 1) << 8) |
-                    (uint)(Memory.Read(_pc + 2) << 16) |
-                    (uint)(Memory.Read(_pc + 3) << 24);
+        var instr = ram.Read(_pc) |
+                    (uint)(ram.Read(_pc + 1) << 8) |
+                    (uint)(ram.Read(_pc + 2) << 16) |
+                    (uint)(ram.Read(_pc + 3) << 24);
         _pc += 4;
         
         var opcode = instr & 0x3F;                  // 6 bits opcode
@@ -47,11 +49,11 @@ public class CPU
                 break;
             
             case Opcode.LD:
-                _registers[reg] = Memory.Read(mode == 0 ? value : _registers[value]);
+                _registers[reg] = ram.Read(mode == 0 ? value : _registers[value]);
                 break;
             
             case Opcode.ST:
-                Memory.Write(mode == 0 ? value : _registers[value], (byte)_registers[reg]);
+                ram.Write(mode == 0 ? value : _registers[value], (byte)_registers[reg]);
                 break;
             
             case Opcode.ADD:
@@ -148,8 +150,17 @@ public class CPU
                 _pc = mode == 0 ? value : _registers[value];
                 break;
             
+            case Opcode.JMPREL:
+                _pc += mode == 0 ? value : _registers[value];
+                break;
+            
+            case Opcode.JMPX:
+                _pc = value;
+                break;
+            
+            
             case Opcode.HLT:
-                _pc = Memory.Size;
+                _pc = ram.Size;
                 break;
             
             default:
@@ -160,7 +171,7 @@ public class CPU
     public void Run(uint maxCycles = 1000)
     {
         uint cycles = 0;
-        while (_pc < Memory.Size && cycles++ < maxCycles)
+        while (_pc < ram.Size && cycles++ < maxCycles)
         {
             Fetch();
         }

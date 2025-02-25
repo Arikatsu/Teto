@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using Xunit;
 
-using Teto.CPU;
+using Teto.Proc;
+using Teto.MMU;
 
 namespace Teto.Tests;
 
@@ -18,9 +20,10 @@ public class CPUTest
         program.AddRange(Utils.EncodeInstruction(0x02, 0x3, 0x0, 0x3)); // LD R3, 3
         program.AddRange(Utils.EncodeInstruction(0x2C, 0x0, 0x0, 0x0)); // HLT
         
-        Memory.LoadProgram(program.ToArray());
+        RAM ram = new();
+        ram.LoadProgram(program.ToArray());
         
-        CPU.CPU cpu = new();
+        CPU cpu = new(ram);
         cpu.Run();
         
         Assert.Equal(8u, cpu.GetRegister(0));

@@ -1,4 +1,4 @@
-namespace Teto.CPU;
+namespace Teto.Proc;
 
 public enum Opcode
 {
