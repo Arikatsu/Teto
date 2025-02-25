@@ -1,16 +1,16 @@
 namespace Teto.MMU;
 
-public enum Segments : uint
+public static class Segments
 {
-    TEXT_START = 0x0000,
-    TEXT_END = 0x3FFF,
+    public const uint TextStart = 0x0000;
+    public const uint TextEnd = 0x3FFF;
     
-    DATA_START = 0x4000,
-    DATA_END = 0x7FFF,
+    public const uint DataStart = 0x4000;
+    public const uint DataEnd = 0x7FFF;
     
-    HEAP_START = 0x8000,
-    HEAP_END = 0xBFFF,
+    public const uint HeapStart = 0x8000;
+    public const uint HeapEnd = 0xBFFF;
     
-    STACK_START = 0xC000,
-    STACK_END = 0xFFFF
+    public const uint StackStart = 0xC000;
+    public const uint StackEnd = 0xFFFF;
 }

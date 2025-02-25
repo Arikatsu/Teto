@@ -7,8 +7,8 @@ namespace Teto.Proc;
 public class CPU(RAM ram)
 {
     private readonly uint[] _registers = new uint[8];
-    private uint _pc = (uint)Segments.TEXT_START;
-    private uint _flags = 0;
+    private uint _pc = Segments.TextStart;
+    private uint _flags;
     
     public uint GetRegister(uint index) => _registers[index];
     

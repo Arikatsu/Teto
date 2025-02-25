@@ -31,6 +31,19 @@ public class RAM
         return _memory[address];
     }
     
+    public uint ReadWord(uint address)
+    {
+        if (address + 4 > _memory.Length)
+        {
+            throw new IndexOutOfRangeException($"Address out of bounds: {address}");
+        }
+        
+        return (uint)(_memory[address] |
+                      (_memory[address + 1] << 8) |
+                      (_memory[address + 2] << 16) |
+                      (_memory[address + 3] << 24));
+    }
+    
     public void Write(uint address, byte value)
     {
         if (address >= _memory.Length)
@@ -41,14 +54,27 @@ public class RAM
         _memory[address] = value;
     }
     
+    public void WriteWord(uint address, uint value)
+    {
+        if (address + 4 > _memory.Length)
+        {
+            throw new IndexOutOfRangeException($"Address out of bounds: {address}");
+        }
+        
+        _memory[address] = (byte)(value & 0xFF);
+        _memory[address + 1] = (byte)((value >> 8) & 0xFF);
+        _memory[address + 2] = (byte)((value >> 16) & 0xFF);
+        _memory[address + 3] = (byte)((value >> 24) & 0xFF);
+    }
+    
     public void LoadProgram(byte[] program)
     {
-        if (program.Length + (uint)Segments.TEXT_START > _memory.Length)
+        if (program.Length + (uint)Segments.TextStart > _memory.Length)
         {
             throw new IndexOutOfRangeException("Program too large");
         }
         
-        Array.Copy(program, 0, _memory, (uint)Segments.TEXT_START, program.Length);
+        Array.Copy(program, 0, _memory, (uint)Segments.TextStart, program.Length);
     }
     
     public void Clear()
