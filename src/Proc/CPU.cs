@@ -4,13 +4,30 @@ using Teto.MMU;
 
 namespace Teto.Proc;
 
-public class CPU(RAM ram)
+public class CPU
 {
+    public const int EAX = 0; 
+    public const int EBX = 1;
+    public const int ECX = 2;
+    public const int EDX = 3;
+    public const int ESI = 4;
+    public const int EDI = 5;
+    public const int EBP = 6;
+    public const int ESP = 7;
+    
     private readonly uint[] _registers = new uint[8];
+    private readonly RAM _ram;
     private uint _pc = Segments.TextStart;
     private uint _flags;
     
+    public CPU(RAM ram)
+    {
+        _ram = ram;
+        _registers[ESP] = Segments.StackEnd;
+    }
+    
     public uint GetRegister(uint index) => _registers[index];
+    public void SetRegister(uint index, uint value) => _registers[index] = value;
     
     public void DumpState()
     {
@@ -21,12 +38,66 @@ public class CPU(RAM ram)
         }
     }
     
+    public void Run(uint maxCycles = 1000)
+    {
+        uint cycles = 0;
+        while (_pc < _ram.Size && cycles++ < maxCycles)
+        {
+            Fetch();
+        }
+    }
+    
+    public void Reset()
+    {
+        _pc = Segments.TextStart;
+        _flags = 0;
+        for (var i = 0; i < _registers.Length; i++)
+        {
+            _registers[i] = 0;
+        }
+    }
+    
+    // --- STACK OPERATIONS ---
+    
+    private void StackPush(uint value)
+    {
+        if (_registers[ESP] - 4 < Segments.StackStart)
+        {
+            throw new StackOverflowException("Stack overflow");
+        }
+        
+        _registers[ESP] -= 4;
+        _ram.WriteWord(_registers[ESP], value);
+    }
+    
+    private uint StackPop()
+    {
+        if (_registers[ESP] + 4 > Segments.StackEnd)
+        {
+            throw new StackOverflowException("Stack underflow");
+        }
+        
+        var value = _ram.ReadWord(_registers[ESP]);
+        
+        if (_registers[ESP] + 4 <= Segments.StackEnd) {
+            _registers[ESP] += 4;
+        } else {
+            throw new InvalidOperationException("Stack pointer would exceed memory bounds");
+        }
+        
+        return value;
+    }
+    
+    
+    // --- FETCH-DECODE-EXECUTE CYCLE ---
+    
+    
     private void Fetch()
     {
-        var instr = ram.Read(_pc) |
-                    (uint)(ram.Read(_pc + 1) << 8) |
-                    (uint)(ram.Read(_pc + 2) << 16) |
-                    (uint)(ram.Read(_pc + 3) << 24);
+        var instr = _ram.Read(_pc) |
+                    (uint)(_ram.Read(_pc + 1) << 8) |
+                    (uint)(_ram.Read(_pc + 2) << 16) |
+                    (uint)(_ram.Read(_pc + 3) << 24);
         _pc += 4;
         
         var opcode = instr & 0x3F;                  // 6 bits opcode
@@ -49,11 +120,25 @@ public class CPU(RAM ram)
                 break;
             
             case Opcode.LD:
-                _registers[reg] = ram.Read(mode == 0 ? value : _registers[value]);
+                _registers[reg] = _ram.Read(mode == 0 ? value : _registers[value]);
                 break;
             
             case Opcode.ST:
-                ram.Write(mode == 0 ? value : _registers[value], (byte)_registers[reg]);
+                _ram.Write(mode == 0 ? value : _registers[value], (byte)_registers[reg]);
+                break;
+            
+            case Opcode.PUSH:
+                StackPush(_registers[reg]);
+                break;
+            
+            case Opcode.POP:
+                _registers[reg] = StackPop();
+                break;
+            
+            case Opcode.XCHG:
+                var tmp = _registers[reg];
+                _registers[reg] = StackPop();
+                StackPush(tmp);
                 break;
             
             case Opcode.ADD:
@@ -158,22 +243,21 @@ public class CPU(RAM ram)
                 _pc = value;
                 break;
             
+            case Opcode.CALL:
+                StackPush(_pc);
+                _pc = mode == 0 ? value : _registers[value];
+                break;
+            
+            case Opcode.RET:
+                _pc = StackPop();
+                break;
             
             case Opcode.HLT:
-                _pc = ram.Size;
+                _pc = _ram.Size;
                 break;
             
             default:
                 throw new InvalidOperationException($"Unknown opcode: {opcode}");
-        }
-    }
-    
-    public void Run(uint maxCycles = 1000)
-    {
-        uint cycles = 0;
-        while (_pc < ram.Size && cycles++ < maxCycles)
-        {
-            Fetch();
         }
     }
 }
