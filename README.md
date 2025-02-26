@@ -5,16 +5,23 @@ A minimal 32-bit CPU emulator that implements a simplified fixed-width x86-like 
 ## Architecture (currently)
 
 - **Memory**: 64KB addressable memory space
-- **Program Counter**: Starts at offset 0x200
 - **Registers**: 8 general-purpose 32-bit registers (similar to x86):
-    - R0 (EAX)
-    - R1 (EBX)
-    - R2 (ECX)
-    - R3 (EDX)
-    - R4 (ESI)
-    - R5 (EDI)
-    - R6 (EBP)
-    - R7 (ESP)
+    - EAX
+    - EBX
+    - ECX
+    - EDX
+    - ESI
+    - EDI
+    - EBP
+    - ESP
+- **Memory Segments**:
+    - Text Segment: 16KB
+    - Data Segment: 16KB
+    - Heap Segment: 16KB
+    - Stack Segment: 16KB
+- **Program Counter**: Starts at 0x0000
+- **Stack**: Grows downwards from 0xFFFF
+- **Heap**: Grows upwards from 0x8000
 
 ## Instruction Format
 
