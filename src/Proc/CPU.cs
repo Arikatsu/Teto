@@ -15,9 +15,9 @@ public class CPU
     public const int EBP = 6;
     public const int ESP = 7;
     
-    private readonly uint[] _registers = new uint[8];
+    private readonly int[] _registers = new int[8];
     private readonly RAM _ram;
-    private uint _pc = Segments.TextStart;
+    private int _pc = Segments.TextStart;
     private uint _flags;
     
     public CPU(RAM ram)
@@ -26,8 +26,8 @@ public class CPU
         _registers[ESP] = Segments.StackEnd;
     }
     
-    public uint GetRegister(uint index) => _registers[index];
-    public void SetRegister(uint index, uint value) => _registers[index] = value;
+    public int GetRegister(int index) => _registers[index];
+    public void SetRegister(int index, int value) => _registers[index] = value;
     
     public void DumpState()
     {
@@ -38,12 +38,13 @@ public class CPU
         }
     }
     
-    public void Run(uint maxCycles = 1000)
+    public void Run(uint maxCycles = 1000, int delay = 0)
     {
         uint cycles = 0;
         while (_pc < _ram.Size && cycles++ < maxCycles)
         {
             Fetch();
+            if (delay > 0) System.Threading.Thread.Sleep(delay);
         }
     }
     
@@ -59,7 +60,7 @@ public class CPU
     
     // --- STACK OPERATIONS ---
     
-    private void StackPush(uint value)
+    private void StackPush(int value)
     {
         if (_registers[ESP] - 4 < Segments.StackStart)
         {
@@ -67,17 +68,17 @@ public class CPU
         }
         
         _registers[ESP] -= 4;
-        _ram.WriteWord(_registers[ESP], value);
+        _ram.WriteWord((uint)_registers[ESP], value);
     }
     
-    private uint StackPop()
+    private int StackPop()
     {
         if (_registers[ESP] + 4 > Segments.StackEnd)
         {
             throw new StackOverflowException("Stack underflow");
         }
         
-        var value = _ram.ReadWord(_registers[ESP]);
+        var value = _ram.ReadWord((uint)_registers[ESP]);
         
         if (_registers[ESP] + 4 <= Segments.StackEnd) {
             _registers[ESP] += 4;
@@ -94,10 +95,10 @@ public class CPU
     
     private void Fetch()
     {
-        var instr = _ram.Read(_pc) |
-                    (uint)(_ram.Read(_pc + 1) << 8) |
-                    (uint)(_ram.Read(_pc + 2) << 16) |
-                    (uint)(_ram.Read(_pc + 3) << 24);
+        var instr = _ram.Read((uint)_pc) |
+                    (_ram.Read((uint)_pc + 1) << 8) |
+                    (_ram.Read((uint)_pc + 2) << 16) |
+                    (_ram.Read((uint)_pc + 3) << 24);
         _pc += 4;
         
         var opcode = instr & 0x3F;                  // 6 bits opcode
@@ -105,10 +106,14 @@ public class CPU
         var mode = (instr >> 9) & 0x1;              // 1 bit mode (0 = immediate, 1 = register)
         var operand = (instr >> 10) & 0x3FFFFF;     // 22 bits operand
         
+        if ((operand & 0x200000) != 0) { 
+            unchecked { operand |= (int)0xFFC00000; }
+        }
+        
         Execute((Opcode)opcode, reg, mode, operand);
     }
     
-    private void Execute(Opcode opcode, uint reg, uint mode, uint value)
+    private void Execute(Opcode opcode, int reg, int mode, int value)
     {
         switch (opcode)
         {
@@ -120,11 +125,11 @@ public class CPU
                 break;
             
             case Opcode.LD:
-                _registers[reg] = _ram.Read(mode == 0 ? value : _registers[value]);
+                _registers[reg] = _ram.Read(mode == 0 ? (uint)value : (uint)_registers[value]);
                 break;
             
             case Opcode.ST:
-                _ram.Write(mode == 0 ? value : _registers[value], (byte)_registers[reg]);
+                _ram.Write(mode == 0 ? (uint)value : (uint)_registers[value], (byte)_registers[reg]);
                 break;
             
             case Opcode.PUSH:
@@ -190,11 +195,11 @@ public class CPU
                 break;
             
             case Opcode.SHL:
-                _registers[reg] <<= (int)(mode == 0 ? value : _registers[value]);
+                _registers[reg] <<= mode == 0 ? value : _registers[value];
                 break;
             
             case Opcode.SHR:
-                _registers[reg] >>= (int)(mode == 0 ? value : _registers[value]);
+                _registers[reg] >>= mode == 0 ? value : _registers[value];
                 break;
             
             case Opcode.CMP:

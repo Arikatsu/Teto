@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Xunit;
 
@@ -7,10 +6,10 @@ using Teto.MMU;
 
 namespace Teto.Tests;
 
-public class CPUTest
+public class MemoryTest
 {
     [Fact]
-    public void TestCPU()
+    public void StoreAndLoad_ShouldWorkCorrectly()
     {
         var program = new List<byte>();
         program.AddRange(Utils.EncodeInstruction(0x01, 0x0, 0x0, 0x5)); // MOV R0, 5
@@ -26,8 +25,8 @@ public class CPUTest
         CPU cpu = new(ram);
         cpu.Run();
         
-        Assert.Equal(8u, cpu.GetRegister(0));
-        Assert.Equal(3u, cpu.GetRegister(1));
-        Assert.Equal(8u, cpu.GetRegister(3));
+        Assert.Equal(8, cpu.GetRegister(0));
+        Assert.Equal(3, cpu.GetRegister(1));
+        Assert.Equal(8, cpu.GetRegister(3));
     }
 }
