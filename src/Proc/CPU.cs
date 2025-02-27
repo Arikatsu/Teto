@@ -203,7 +203,8 @@ public class CPU
                 break;
             
             case Opcode.CMP:
-                _flags = _registers[reg] == (mode == 0 ? value : _registers[value]) ? 1u : 0u;
+                _flags = _registers[reg] == (mode == 0 ? value : _registers[value]) ? 1u : 
+                         _registers[reg] > (mode == 0 ? value : _registers[value]) ? 2u : 0u;
                 break;
             
             case Opcode.JEQ:
@@ -212,27 +213,27 @@ public class CPU
                 break;
             
             case Opcode.JNE:
-                if (_flags == 0)
+                if (_flags != 1)
                     _pc = mode == 0 ? value : _registers[value];
                 break;
             
             case Opcode.JGT:
-                if (_flags == 1 && _registers[reg] > (mode == 0 ? value : _registers[value]))
+                if (_flags == 2)
                     _pc = mode == 0 ? value : _registers[value];
                 break;
             
             case Opcode.JLT:
-                if (_flags == 1 && _registers[reg] < (mode == 0 ? value : _registers[value]))
+                if (_flags == 0)
                     _pc = mode == 0 ? value : _registers[value];
                 break;
             
             case Opcode.JGE:
-                if (_flags == 1 && _registers[reg] >= (mode == 0 ? value : _registers[value]))
+                if (_flags > 0)
                     _pc = mode == 0 ? value : _registers[value];
                 break;
             
             case Opcode.JLE:
-                if (_flags == 1 && _registers[reg] <= (mode == 0 ? value : _registers[value]))
+                if (_flags < 2)
                     _pc = mode == 0 ? value : _registers[value];
                 break;
             
