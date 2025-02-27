@@ -1,15 +1,15 @@
+using Teto.Proc;
+
 namespace Teto;
 
 public class Utils
 {
-    public static byte[] EncodeInstruction(byte opcode, byte reg, byte mode, int operand)
+    public static byte[] EncodeInstruction(Opcode opcode, byte reg, byte mode, int operand)
     {
-        opcode &= 0x3F;        // 6 bits
-        reg &= 0x7;            // 3 bits
-        mode &= 0x1;           // 1 bit
-        operand &= 0x3FFFFF;   // 22 bits
-    
-        var instruction = opcode | (reg << 6) | (mode << 9) | (operand << 10);
+        var instruction = ((byte)opcode & 0x3F)             // 6-bit opcode
+                          | ((reg & 0x7) << 6)              // 3-bit register
+                          | ((mode & 0x1) << 9)             // 1-bit mode
+                          | ((operand & 0x3FFFFF) << 10);   // 22-bit operand
     
         return
         [

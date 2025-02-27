@@ -6,10 +6,10 @@ using Teto.Proc;
 using Teto.MMU;
 
 var program = new List<byte>();
-program.AddRange(Utils.EncodeInstruction(0x01, 0x0, 0x0, -5));
-program.AddRange(Utils.EncodeInstruction(0x01, 0x1, 0x0, -3));
-program.AddRange(Utils.EncodeInstruction(0x07, 0x0, 0x1, 0x1));
-program.AddRange(Utils.EncodeInstruction(0x2C, 0x0, 0x0, 0x0));
+program.AddRange(Utils.EncodeInstruction(Opcode.MOV, 0x0, 0x0, -5));
+program.AddRange(Utils.EncodeInstruction(Opcode.MOV, 0x1, 0x0, -3));
+program.AddRange(Utils.EncodeInstruction(Opcode.ADD, 0x0, 0x1, 0x1));
+program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0x0));
 
 RAM ram = new();
 ram.LoadProgram(program.ToArray());

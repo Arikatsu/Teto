@@ -1,6 +1,6 @@
 namespace Teto.Proc;
 
-public enum Opcode
+public enum Opcode : byte
 {
     // --- Data Movement ---
     NOP  = 0x00,  // No operation

@@ -22,13 +22,13 @@ public class StackTests
     public void PushAndPop_ShouldMaintainFifoOrder()
     {
         var program = new List<byte>();
-        program.AddRange(Utils.EncodeInstruction(0x01, 0x0, 0x0, 1234)); // MOV R0, 0x1234
-        program.AddRange(Utils.EncodeInstruction(0x01, 0x1, 0x0, 5678)); // MOV R1, 0x5678
-        program.AddRange(Utils.EncodeInstruction(0x04, 0x0, 0x0, 0));    // PUSH R0
-        program.AddRange(Utils.EncodeInstruction(0x04, 0x1, 0x0, 0));    // PUSH R1
-        program.AddRange(Utils.EncodeInstruction(0x05, 0x2, 0x0, 0));    // POP R2
-        program.AddRange(Utils.EncodeInstruction(0x05, 0x3, 0x0, 0));    // POP R3
-        program.AddRange(Utils.EncodeInstruction(0x2C, 0x0, 0x0, 0));    // HLT
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, 0x0, 0x0, 1234)); // MOV R0, 0x1234
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, 0x1, 0x0, 5678)); // MOV R1, 0x5678
+        program.AddRange(Utils.EncodeInstruction(Opcode.PUSH, 0x0, 0x0, 0));   // PUSH R0
+        program.AddRange(Utils.EncodeInstruction(Opcode.PUSH, 0x1, 0x0, 0));   // PUSH R1
+        program.AddRange(Utils.EncodeInstruction(Opcode.POP, 0x2, 0x0, 0));    // POP R2
+        program.AddRange(Utils.EncodeInstruction(Opcode.POP, 0x3, 0x0, 0));    // POP R3
+        program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0));    // HLT
 
         _ram.LoadProgram(program.ToArray());
         _cpu.Run();
@@ -44,12 +44,12 @@ public class StackTests
     public void CallAndReturn_ShouldWorkCorrectly()
     {
         var program = new List<byte>();
-        program.AddRange(Utils.EncodeInstruction(0x01, 0x0, 0x0, 1));  // MOV R0, 1
-        program.AddRange(Utils.EncodeInstruction(0x26, 0x0, 0x0, 20)); // CALL subroutine
-        program.AddRange(Utils.EncodeInstruction(0x2C, 0x0, 0x0, 0));  // HLT
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, 0x0, 0x0, 1));   // MOV R0, 1
+        program.AddRange(Utils.EncodeInstruction(Opcode.CALL, 0x0, 0x0, 20)); // CALL subroutine
+        program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0));   // HLT
         program.AddRange(new byte[0x20 - program.Count]); // Padding
-        program.AddRange(Utils.EncodeInstruction(0x0C, 0x0, 0x0, 0));  // INC R0
-        program.AddRange(Utils.EncodeInstruction(0x27, 0x0, 0x0, 0));  // RET
+        program.AddRange(Utils.EncodeInstruction(Opcode.INC, 0x0, 0x0, 0));   // INC R0
+        program.AddRange(Utils.EncodeInstruction(Opcode.RET, 0x0, 0x0, 0));   // RET
 
         _ram.LoadProgram(program.ToArray());
         _cpu.Run();
