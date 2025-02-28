@@ -127,12 +127,42 @@ public class CPU
                 _registers[reg] = mode == 0 ? value : _registers[value];
                 break;
             
+            case Opcode.MOVHI:
+                _registers[reg] = (_registers[reg] & 0xFFFF) | ((value & 0xFFFF) << 16);
+                break;
+    
+            case Opcode.MOVLO:
+                _registers[reg] = (int)(_registers[reg] & 0xFFFF0000) | (value & 0xFFFF);
+                break;
+            
             case Opcode.LD:
                 _registers[reg] = _ram.Read(mode == 0 ? (uint)value : (uint)_registers[value]);
                 break;
             
             case Opcode.ST:
                 _ram.Write(mode == 0 ? (uint)value : (uint)_registers[value], (byte)_registers[reg]);
+                break;
+            
+            case Opcode.LDHI:
+                var addrHi = mode == 0 ? (uint)value : (uint)_registers[value];
+                _registers[reg] = (_registers[reg] & 0xFFFF) | ((_ram.Read(addrHi) | (_ram.Read(addrHi + 1) << 8)) << 16);
+                break;
+
+            case Opcode.LDLO:
+                var addrLo = mode == 0 ? (uint)value : (uint)_registers[value];
+                _registers[reg] = (int)(_registers[reg] & 0xFFFF0000) | _ram.Read(addrLo) | (_ram.Read(addrLo + 1) << 8);
+                break;
+
+            case Opcode.STHI:
+                var addrHiSt = mode == 0 ? (uint)value : (uint)_registers[value];
+                _ram.Write(addrHiSt, (byte)((_registers[reg] >> 16) & 0xFF));
+                _ram.Write(addrHiSt + 1, (byte)((_registers[reg] >> 24) & 0xFF));
+                break;
+
+            case Opcode.STLO:
+                var addrLoSt = mode == 0 ? (uint)value : (uint)_registers[value];
+                _ram.Write(addrLoSt, (byte)(_registers[reg] & 0xFF));
+                _ram.Write(addrLoSt + 1, (byte)((_registers[reg] >> 8) & 0xFF));
                 break;
             
             case Opcode.PUSH:
