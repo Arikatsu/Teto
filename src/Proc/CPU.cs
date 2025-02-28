@@ -38,13 +38,17 @@ public class CPU
         }
     }
     
-    public void Run(uint maxCycles = 1000, int delay = 0)
+    public void Run(uint maxCycles = 1000, int delay = 0, bool dumpRegisters = false, bool dumpMemory = false, uint offset = 0, uint length = 0)
     {
         uint cycles = 0;
         while (_pc < _ram.Size && cycles++ < maxCycles)
         {
             Fetch();
             if (delay > 0) System.Threading.Thread.Sleep(delay);
+            if (dumpRegisters) DumpState();
+            if (dumpMemory) _ram.Dump(offset, length);
+            
+            Console.WriteLine();
         }
     }
     
@@ -101,14 +105,13 @@ public class CPU
                     (_ram.Read((uint)_pc + 3) << 24);
         _pc += 4;
         
-        var opcode = instr & 0x3F;                  // 6 bits opcode
-        var reg = (instr >> 6) & 0x7;               // 3 bits register
-        var mode = (instr >> 9) & 0x1;              // 1 bit mode (0 = immediate, 1 = register)
-        var operand = (instr >> 10) & 0x3FFFFF;     // 22 bits operand
-        
-        if ((operand & 0x200000) != 0) { 
-            unchecked { operand |= (int)0xFFC00000; }
-        }
+        var opcode = instr & 0xFF;                     // 8 bits opcode
+        var reg = (instr >> 8) & 0xF;                  // 4 bits register
+        var mode = (instr >> 12) & 0xF;                // 4 bits mode
+        var operand = (instr >> 16) & 0xFFFF;          // 16 bits operand
+
+        if ((operand & 0x8000) != 0) 
+            unchecked { operand |= (int)0xFFFF0000; }
         
         Execute((Opcode)opcode, reg, mode, operand);
     }
