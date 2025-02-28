@@ -45,7 +45,6 @@ public class MovHighLowTests
 
         Assert.Equal(0xAAAAFFFF, (uint)_cpu.GetRegister(CPU.EAX));
 
-        // Reset and test MOVLO
         _ram.Clear();
         _cpu.Reset();
         
@@ -73,5 +72,19 @@ public class MovHighLowTests
         _cpu.Run();
 
         Assert.Equal(-1, _cpu.GetRegister(CPU.EAX));
+    }
+    
+    [Fact]
+    public void FloatMovHighLow_ShouldHandleFloatingPointValues()
+    {
+        var program = new List<byte>();
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EAX, 0x0, 0x0FDB)); // FMOVLO R0, low bits of PI
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EAX, 0x0, 0x4049)); // FMOVHI R0, high bits of PI
+        program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0));             // HLT
+
+        _ram.LoadProgram(program.ToArray());
+        _cpu.Run();
+        
+        Assert.Equal(3.14159012f, _cpu.GetRegisterF(CPU.EAX), precision: 5);
     }
 }

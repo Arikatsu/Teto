@@ -27,16 +27,10 @@ public class CPU
     }
     
     public int GetRegister(int index) => _registers[index];
-    public void SetRegister(int index, int value) => _registers[index] = value;
+    public float GetRegisterF(int index) => BitConverter.Int32BitsToSingle(_registers[index]);
     
-    public void DumpState()
-    {
-        Console.WriteLine($"PC: 0x{_pc:X4}");
-        for (var i = 0; i < _registers.Length; i++)
-        {
-            Console.WriteLine($"R{i}: {_registers[i]}");
-        }
-    }
+    public void SetRegister(int index, int value) => _registers[index] = value;
+    public void SetRegisterF(int index, float value) => _registers[index] = BitConverter.SingleToInt32Bits(value);
     
     public void Run(uint maxCycles = 1000, int delay = 0, bool dumpRegisters = false, bool dumpMemory = false, uint offset = 0, uint length = 0)
     {
@@ -211,6 +205,53 @@ public class CPU
                 _registers[reg] = ~_registers[reg] + 1;
                 break;
             
+            case Opcode.FADD:
+                var f1 = BitConverter.Int32BitsToSingle(_registers[reg]);
+                var f2 = BitConverter.Int32BitsToSingle(mode == 0 ? value : _registers[value]);
+                _registers[reg] = BitConverter.SingleToInt32Bits(f1 + f2);
+                break;
+            
+            case Opcode.FSUB:
+                f1 = BitConverter.Int32BitsToSingle(_registers[reg]);
+                f2 = BitConverter.Int32BitsToSingle(mode == 0 ? value : _registers[value]);
+                _registers[reg] = BitConverter.SingleToInt32Bits(f1 - f2);
+                break;
+            
+            case Opcode.FMUL:
+                f1 = BitConverter.Int32BitsToSingle(_registers[reg]);
+                f2 = BitConverter.Int32BitsToSingle(mode == 0 ? value : _registers[value]);
+                _registers[reg] = BitConverter.SingleToInt32Bits(f1 * f2);
+                break;
+            
+            case Opcode.FDIV:
+                f1 = BitConverter.Int32BitsToSingle(_registers[reg]);
+                f2 = BitConverter.Int32BitsToSingle(mode == 0 ? value : _registers[value]);
+                _registers[reg] = BitConverter.SingleToInt32Bits(f1 / f2);
+                break;
+            
+            case Opcode.FMOVHI:
+                var currentVal = _registers[reg];
+                var newHigh = (value & 0xFFFF) << 16;
+                _registers[reg] = (currentVal & 0xFFFF) | newHigh;
+                break;
+    
+            case Opcode.FMOVLO:
+                currentVal = _registers[reg];
+                var newLow = value & 0xFFFF;
+                _registers[reg] = (int)(currentVal & 0xFFFF0000) | newLow;
+                break;
+            
+            case Opcode.ITOF:
+                var intValue = _registers[reg];
+                var floatValue = (float)intValue;
+                _registers[value] = BitConverter.SingleToInt32Bits(floatValue);
+                break;
+
+            case Opcode.FTOI:
+                var fValue = BitConverter.Int32BitsToSingle(_registers[reg]);
+                _registers[value] = (int)fValue;
+                break;
+            
             case Opcode.AND:
                 _registers[reg] &= mode == 0 ? value : _registers[value];
                 break;
@@ -297,6 +338,15 @@ public class CPU
             
             default:
                 throw new InvalidOperationException($"Unknown opcode: {opcode}");
+        }
+    }
+    
+    private void DumpState()
+    {
+        Console.WriteLine($"PC: 0x{_pc:X4}");
+        for (var i = 0; i < _registers.Length; i++)
+        {
+            Console.WriteLine($"R{i}: {_registers[i]}");
         }
     }
 }
