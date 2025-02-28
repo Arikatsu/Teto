@@ -28,14 +28,14 @@ A minimal 32-bit CPU emulator that implements a simplified fixed-width x86-like 
 Each instruction is 32 bits (4 bytes) with the following layout:
 
 ```
-0        6       9      10                32 (BIT)
-+--------+-------+------+--------------------+
-| Opcode |  Reg  | Mode |      Operand       |
-+--------+-------+------+--------------------+
+0            8       12     16                32 (BIT)
++------------+-------+------+--------------------+
+|   Opcode   |  Reg  | Mode |      Operand       |
++------------+-------+------+--------------------+
 
-Opcode  = 6 bits  (Operation to execute)  
-Reg     = 3 bits  (Target register)  
-Mode    = 1 bit   (0 = Immediate, 1 = Register)  
-Operand = 22 bits (Immediate value or register address)
+Opcode  = 8 bits  (Operation to execute)  
+Reg     = 4 bits  (Target register)  
+Mode    = 4 bits  (0 = Immediate, 1 = Register)  
+Operand = 16 bits (Immediate value or register address)
 ```
 
