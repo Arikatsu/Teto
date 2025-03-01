@@ -17,8 +17,11 @@ public class CPU
     
     private readonly int[] _registers = new int[8];
     private readonly RAM _ram;
-    private int _pc = Segments.TextStart;
-    private uint _flags;
+    
+    public int PC { get; private set; } = Segments.TextStart;
+    public uint Flags { get; private set; }
+    public bool Halted { get; private set; }
+    public string LastInstruction { get; private set; } = string.Empty;
     
     public CPU(RAM ram)
     {
@@ -35,7 +38,7 @@ public class CPU
     public void Run(uint maxCycles = 1000, int delay = 0, bool dumpRegisters = false, bool dumpMemory = false, uint offset = 0, uint length = 0)
     {
         uint cycles = 0;
-        while (_pc < _ram.Size && cycles++ < maxCycles)
+        while (Halted && PC < _ram.Size && cycles++ < maxCycles)
         {
             Fetch();
             if (delay > 0) System.Threading.Thread.Sleep(delay);
@@ -48,8 +51,9 @@ public class CPU
     
     public void Reset()
     {
-        _pc = Segments.TextStart;
-        _flags = 0;
+        PC = Segments.TextStart;
+        Flags = 0;
+        Halted = false;
         for (var i = 0; i < _registers.Length; i++)
         {
             _registers[i] = 0;
@@ -93,11 +97,11 @@ public class CPU
     
     private void Fetch()
     {
-        var instr = _ram.Read((uint)_pc) |
-                    (_ram.Read((uint)_pc + 1) << 8) |
-                    (_ram.Read((uint)_pc + 2) << 16) |
-                    (_ram.Read((uint)_pc + 3) << 24);
-        _pc += 4;
+        var instr = _ram.Read((uint)PC) |
+                    (_ram.Read((uint)PC + 1) << 8) |
+                    (_ram.Read((uint)PC + 2) << 16) |
+                    (_ram.Read((uint)PC + 3) << 24);
+        PC += 4;
         
         var opcode = instr & 0xFF;                     // 8 bits opcode
         var reg = (instr >> 8) & 0xF;                  // 4 bits register
@@ -277,63 +281,63 @@ public class CPU
                 break;
             
             case Opcode.CMP:
-                _flags = _registers[reg] == (mode == 0 ? value : _registers[value]) ? 1u : 
+                Flags = _registers[reg] == (mode == 0 ? value : _registers[value]) ? 1u : 
                          _registers[reg] > (mode == 0 ? value : _registers[value]) ? 2u : 0u;
                 break;
             
             case Opcode.JEQ:
-                if (_flags == 1)
-                    _pc = mode == 0 ? value : _registers[value];
+                if (Flags == 1)
+                    PC = mode == 0 ? value : _registers[value];
                 break;
             
             case Opcode.JNE:
-                if (_flags != 1)
-                    _pc = mode == 0 ? value : _registers[value];
+                if (Flags != 1)
+                    PC = mode == 0 ? value : _registers[value];
                 break;
             
             case Opcode.JGT:
-                if (_flags == 2)
-                    _pc = mode == 0 ? value : _registers[value];
+                if (Flags == 2)
+                    PC = mode == 0 ? value : _registers[value];
                 break;
             
             case Opcode.JLT:
-                if (_flags == 0)
-                    _pc = mode == 0 ? value : _registers[value];
+                if (Flags == 0)
+                    PC = mode == 0 ? value : _registers[value];
                 break;
             
             case Opcode.JGE:
-                if (_flags > 0)
-                    _pc = mode == 0 ? value : _registers[value];
+                if (Flags > 0)
+                    PC = mode == 0 ? value : _registers[value];
                 break;
             
             case Opcode.JLE:
-                if (_flags < 2)
-                    _pc = mode == 0 ? value : _registers[value];
+                if (Flags < 2)
+                    PC = mode == 0 ? value : _registers[value];
                 break;
             
             case Opcode.JMP:
-                _pc = mode == 0 ? value : _registers[value];
+                PC = mode == 0 ? value : _registers[value];
                 break;
             
             case Opcode.JMPREL:
-                _pc += mode == 0 ? value : _registers[value];
+                PC += mode == 0 ? value : _registers[value];
                 break;
             
             case Opcode.JMPX:
-                _pc = value;
+                PC = value;
                 break;
             
             case Opcode.CALL:
-                StackPush(_pc);
-                _pc = mode == 0 ? value : _registers[value];
+                StackPush(PC);
+                PC = mode == 0 ? value : _registers[value];
                 break;
             
             case Opcode.RET:
-                _pc = StackPop();
+                PC = StackPop();
                 break;
             
             case Opcode.HLT:
-                _pc = _ram.Size;
+                Halted = true;
                 break;
             
             default:
