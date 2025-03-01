@@ -8,17 +8,20 @@ public class RAM
 
     public int Size => _memory.Length;
     
-    public void Dump(uint offset, uint length)
+    public string Dump(uint offset, uint length)
     {
         if (offset + length > _memory.Length)
         {
             throw new IndexOutOfRangeException("Dump out of bounds");
         }
         
+        var dump = string.Empty;
         for (var i = offset; i < offset + length; i++)
         {
-            Console.WriteLine($"0x{i:X4}: 0x{_memory[i]:X2}");
+            dump += $"0x{i:X4}: 0x{_memory[i]:X2}\n";
         }
+        
+        return dump;
     }
     
     public byte Read(uint address)

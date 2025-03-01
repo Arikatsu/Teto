@@ -1,5 +1,6 @@
 using System;
 
+using Teto.Debugging;
 using Teto.MMU;
 
 namespace Teto.Proc;
@@ -35,17 +36,19 @@ public class CPU
     public void SetRegister(int index, int value) => _registers[index] = value;
     public void SetRegisterF(int index, float value) => _registers[index] = BitConverter.SingleToInt32Bits(value);
     
-    public void Run(uint maxCycles = 1000, int delay = 0, bool dumpRegisters = false, bool dumpMemory = false, uint offset = 0, uint length = 0)
+    public void Step() 
+    {
+        if (!Halted)
+            Fetch();
+    }
+    
+    public void Run(uint maxCycles = 1000, int delay = 0)
     {
         uint cycles = 0;
         while (Halted && PC < _ram.Size && cycles++ < maxCycles)
         {
             Fetch();
             if (delay > 0) System.Threading.Thread.Sleep(delay);
-            if (dumpRegisters) DumpState();
-            if (dumpMemory) _ram.Dump(offset, length);
-            
-            Console.WriteLine();
         }
     }
     
@@ -112,6 +115,7 @@ public class CPU
             unchecked { operand |= (int)0xFFFF0000; }
         
         Execute((Opcode)opcode, reg, mode, operand);
+        LastInstruction = Disassembler.DisassembleIntInstruction(instr);
     }
     
     private void Execute(Opcode opcode, int reg, int mode, int value)
@@ -342,15 +346,6 @@ public class CPU
             
             default:
                 throw new InvalidOperationException($"Unknown opcode: {opcode}");
-        }
-    }
-    
-    private void DumpState()
-    {
-        Console.WriteLine($"PC: 0x{_pc:X4}");
-        for (var i = 0; i < _registers.Length; i++)
-        {
-            Console.WriteLine($"R{i}: {_registers[i]}");
         }
     }
 }

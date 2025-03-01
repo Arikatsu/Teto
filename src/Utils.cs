@@ -1,5 +1,3 @@
-using System;
-
 using Teto.Proc;
 
 namespace Teto;
