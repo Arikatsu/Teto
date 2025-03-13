@@ -28,6 +28,7 @@ public class CPU
     {
         _ram = ram;
         _registers[ESP] = Segments.StackEnd;
+        _registers[EBP] = Segments.StackEnd;
     }
     
     public int GetRegister(int index) => _registers[index];
@@ -59,6 +60,7 @@ public class CPU
         Halted = false;
         Array.Clear(_registers, 0, _registers.Length);
         _registers[ESP] = Segments.StackEnd;
+        _registers[EBP] = Segments.StackEnd;
         LastInstruction = string.Empty;
     }
     
