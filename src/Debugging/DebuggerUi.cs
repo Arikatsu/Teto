@@ -168,6 +168,12 @@ public class DebuggerUi(CPU cpu)
         _historyLines.Add(instruction);
         _historyListView?.SetSource(_historyLines);
     }
+    
+    public void ClearHistory()
+    {
+        _historyLines.Clear();
+        _historyListView?.SetSource(_historyLines);
+    }
 
     public void UpdateMemorySegment(MemorySegmentType segmentType, List<string> lines)
     {

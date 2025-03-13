@@ -70,7 +70,6 @@ public enum Opcode : byte
     INT     = 0x34,  // Software interrupt
     IRET    = 0x35,  // Return from interrupt
     HLT     = 0x36,  // Halt execution
-    SYSCALL = 0x37,  // System call
-    CLI     = 0x38,  // Disable interrupts
-    STI     = 0x39   // Enable interrupts
+    CLI     = 0x37,  // Disable interrupts
+    STI     = 0x38   // Enable interrupts
 }

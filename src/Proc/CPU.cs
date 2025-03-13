@@ -57,10 +57,9 @@ public class CPU
         PC = Segments.TextStart;
         Flags = 0;
         Halted = false;
-        for (var i = 0; i < _registers.Length; i++)
-        {
-            _registers[i] = 0;
-        }
+        Array.Clear(_registers, 0, _registers.Length);
+        _registers[ESP] = Segments.StackEnd;
+        LastInstruction = string.Empty;
     }
     
     // --- STACK OPERATIONS ---

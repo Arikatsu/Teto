@@ -148,9 +148,8 @@ public class Disassembler(RAM ram)
             0x34 => "INT",
             0x35 => "IRET",
             0x36 => "HLT",
-            0x37 => "SYSCALL",
-            0x38 => "CLI",
-            0x39 => "STI",
+            0x37 => "CLI",
+            0x38 => "STI",
             _ => $"OP{opcode:X2}"
         };
     }

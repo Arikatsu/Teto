@@ -80,8 +80,8 @@ public class Debugger
     {
         if (MessageBox.Query("Reset CPU", "Are you sure you want to reset the CPU?", "Yes", "No") != 0) return;
         _cpu.Reset();
-        _ram.Clear();
         _disassembler.ClearCache();
+        _ui.ClearHistory();
         RefreshAll();
     }
     
@@ -230,8 +230,7 @@ public class Debugger
         _ui.UpdateMemorySegment(MemorySegmentType.HEAP, _memoryLines);
 
         _memoryLines.Clear();
-        var stackPointer = _cpu.GetRegister(CPU.ESP);
-        _memoryViewer.UpdateSegmentView(Segments.StackEnd, 8, _memoryLines, stackPointer, true);
+        _memoryViewer.UpdateSegmentView(Segments.StackEnd, 8, _memoryLines, true);
         _ui.UpdateMemorySegment(MemorySegmentType.STACK, _memoryLines);
     }
     
