@@ -284,6 +284,22 @@ public class CPU
                 _registers[reg] >>= mode == 0 ? value : _registers[value];
                 break;
             
+            case Opcode.ROL:
+                var rolValue = mode == 0 ? value : _registers[value];
+                rolValue %= 32;
+                _registers[reg] = (_registers[reg] << rolValue) | (_registers[reg] >> (32 - rolValue));
+                break;
+            
+            case Opcode.ROR:
+                var rorValue = mode == 0 ? value : _registers[value];
+                rorValue %= 32;
+                _registers[reg] = (_registers[reg] >> rorValue) | (_registers[reg] << (32 - rorValue));
+                break;
+            
+            case Opcode.TEST:
+                Flags = (_registers[reg] & (mode == 0 ? value : _registers[value])) == 0 ? 1u : 0u;
+                break;
+            
             case Opcode.CMP:
                 Flags = _registers[reg] == (mode == 0 ? value : _registers[value]) ? 1u : 
                          _registers[reg] > (mode == 0 ? value : _registers[value]) ? 2u : 0u;
@@ -338,6 +354,17 @@ public class CPU
             
             case Opcode.RET:
                 PC = StackPop();
+                break;
+            
+            case Opcode.ENTER:
+                StackPush(_registers[EBP]);
+                _registers[EBP] = _registers[ESP];
+                _registers[ESP] -= value;
+                break;
+            
+            case Opcode.LEAVE:
+                _registers[ESP] = _registers[EBP];
+                _registers[EBP] = StackPop();
                 break;
             
             case Opcode.HLT:
