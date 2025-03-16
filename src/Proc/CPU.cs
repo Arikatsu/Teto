@@ -46,7 +46,7 @@ public class CPU
     public void Run(uint maxCycles = 1000, int delay = 0)
     {
         uint cycles = 0;
-        while (Halted && PC < _ram.Size && cycles++ < maxCycles)
+        while (!Halted && PC < _ram.Size && cycles++ < maxCycles)
         {
             Fetch();
             if (delay > 0) System.Threading.Thread.Sleep(delay);
