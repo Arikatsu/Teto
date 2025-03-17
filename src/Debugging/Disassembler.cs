@@ -27,7 +27,7 @@ public class Disassembler(RAM ram)
                 0x00 or 0x31 or 0x36 => opcodeName,
             
                 >= 0x27 and <= 0x2F => 
-                    $"{opcodeName} {(mode == 0 ? "$" : string.Empty)}{(mode == 0 ? $"0x{operand:X4}" : GetRegisterName(operand & 0xF))}",
+                    $"{opcodeName} {FormatOperandWithAddrMode(mode, operand)}",
             
                 _ => FormatStandardInstruction(opcodeName, reg, mode, operand)
             };
@@ -50,15 +50,15 @@ public class Disassembler(RAM ram)
     {
         return reg switch
         {
-            0 => "EAX",
-            1 => "EBX",
-            2 => "ECX",
-            3 => "EDX",
-            4 => "ESI",
-            5 => "EDI",
-            6 => "EBP",
-            7 => "ESP",
-            _ => $"R{reg}"
+            0 => "eax",
+            1 => "ebx",
+            2 => "ecx",
+            3 => "edx",
+            4 => "esi",
+            5 => "edi",
+            6 => "ebp",
+            7 => "esp",
+            _ => $"r{reg}"
         };
     }
     
@@ -75,7 +75,7 @@ public class Disassembler(RAM ram)
             0x00 or 0x31 or 0x36 => opcodeName,
         
             >= 0x27 and <= 0x2F => 
-                $"{opcodeName} {(mode == 0 ? "$" : string.Empty)}{(mode == 0 ? $"0x{operand:X4}" : GetRegisterName(operand & 0xF))}",
+                $"{opcodeName} {FormatOperandWithAddrMode(mode, operand)}",
         
             _ => FormatStandardInstruction(opcodeName, reg, mode, operand)
         };
@@ -84,73 +84,92 @@ public class Disassembler(RAM ram)
     private static string FormatStandardInstruction(string opcodeName, byte reg, byte mode, ushort operand)
     {
         var regName = GetRegisterName(reg);
-        var modeStr = mode == 0 ? "$" : string.Empty;
-        var operandStr = mode == 0 ? $"0x{operand:X4}" : GetRegisterName(operand & 0xF);
-        return $"{opcodeName} {regName}, {modeStr}{operandStr}";
+        var operandStr = FormatOperandWithAddrMode(mode, operand);
+        return $"{opcodeName} {regName}, {operandStr}";
+    }
+    
+    private static string FormatOperandWithAddrMode(byte mode, ushort operand)
+    {
+        return mode switch
+        {
+            0 => $"0x{operand:X4}",
+            1 => $"[0x{operand:X4}]",
+            2 => $"{GetRegisterName(operand & 0xF)}",
+            3 => $"[heap + 0x{operand:X4}]",
+            4 => $"[eax + 0x{operand:X4}]",
+            5 => $"[ebx + 0x{operand:X4}]",
+            6 => $"[ecx + 0x{operand:X4}]",
+            7 => $"[edx + 0x{operand:X4}]",
+            8 => $"[esi + 0x{operand:X4}]",
+            9 => $"[edi + 0x{operand:X4}]",
+            10 => $"[ebp - 0x{operand:X4}]",
+            11 => $"[esp - 0x{operand:X4}]",
+            _ => $"[??? {operand:X4}]"
+        };
     }
 
     private static string GetOpcodeName(byte opcode)
     {
         return opcode switch
         {
-            0x00 => "NOP",
-            0x01 => "MOV",
-            0x02 => "MOVHI",
-            0x03 => "MOVLO",
-            0x04 => "LD",
-            0x05 => "LDHI",
-            0x06 => "LDLO",
-            0x07 => "ST",
-            0x08 => "STHI",
-            0x09 => "STLO",
-            0x0A => "PUSH",
-            0x0B => "POP",
-            0x0C => "XCHG",
-            0x0D => "ADD",
-            0x0E => "SUB",
-            0x0F => "MUL",
-            0x10 => "DIV",
-            0x11 => "MOD",
-            0x12 => "INC",
-            0x13 => "DEC",
-            0x14 => "NEG",
-            0x15 => "FADD",
-            0x16 => "FSUB",
-            0x17 => "FMUL",
-            0x18 => "FDIV",
-            0x19 => "FMOVHI",
-            0x1A => "FMOVLO",
-            0x1B => "ITOF",
-            0x1C => "FTOI",
-            0x1D => "AND",
-            0x1E => "OR",
-            0x1F => "XOR",
-            0x20 => "NOT",
-            0x21 => "SHL",
-            0x22 => "SHR",
-            0x23 => "ROL",
-            0x24 => "ROR",
-            0x25 => "TEST",
-            0x26 => "CMP",
-            0x27 => "JEQ",
-            0x28 => "JNE",
-            0x29 => "JGT",
-            0x2A => "JLT",
-            0x2B => "JGE",
-            0x2C => "JLE",
-            0x2D => "JMP",
-            0x2E => "JMPREL",
-            0x2F => "JMPX",
-            0x30 => "CALL",
-            0x31 => "RET",
-            0x32 => "ENTER",
-            0x33 => "LEAVE",
-            0x34 => "INT",
-            0x35 => "IRET",
-            0x36 => "HLT",
-            0x37 => "CLI",
-            0x38 => "STI",
-            _ => $"OP{opcode:X2}"
+            0x00 => "nop",
+            0x01 => "mov",
+            0x02 => "movhi",
+            0x03 => "movlo",
+            0x04 => "ld",
+            0x05 => "ldhi",
+            0x06 => "ldlo",
+            0x07 => "st",
+            0x08 => "sthi",
+            0x09 => "stlo",
+            0x0A => "push",
+            0x0B => "pop",
+            0x0C => "xchg",
+            0x0D => "add",
+            0x0E => "sub",
+            0x0F => "mul",
+            0x10 => "div",
+            0x11 => "mod",
+            0x12 => "inc",
+            0x13 => "dec",
+            0x14 => "neg",
+            0x15 => "fadd",
+            0x16 => "fsub",
+            0x17 => "fmul",
+            0x18 => "fdiv",
+            0x19 => "fmovhi",
+            0x1A => "fmovlo",
+            0x1B => "itof",
+            0x1C => "ftoi",
+            0x1D => "and",
+            0x1E => "or",
+            0x1F => "xor",
+            0x20 => "not",
+            0x21 => "shl",
+            0x22 => "shr",
+            0x23 => "rol",
+            0x24 => "ror",
+            0x25 => "test",
+            0x26 => "cmp",
+            0x27 => "jeq",
+            0x28 => "jne",
+            0x29 => "jgt",
+            0x2A => "jlt",
+            0x2B => "jge",
+            0x2C => "jle",
+            0x2D => "jmp",
+            0x2E => "jmprel",
+            0x2F => "jmpx",
+            0x30 => "call",
+            0x31 => "ret",
+            0x32 => "enter",
+            0x33 => "leave",
+            0x34 => "int",
+            0x35 => "iret",
+            0x36 => "hlt",
+            0x37 => "cli",
+            0x38 => "sti",
+            _ => $"op{opcode:X2}"
         };
     }
 }

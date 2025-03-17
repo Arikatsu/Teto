@@ -131,7 +131,7 @@ public class DebuggerUi(CPU cpu)
 
         for (var i = 0; i < 8; i++)
         {
-            _registerFloatLabels[i].Text = $"F.{Disassembler.GetRegisterName(i)}: {cpu.GetRegisterF(i)}";
+            _registerFloatLabels[i].Text = $"F.{Disassembler.GetRegisterName(i).ToUpper()}: {cpu.GetRegisterF(i)}";
         }
     }
 
