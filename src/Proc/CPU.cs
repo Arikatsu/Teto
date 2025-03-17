@@ -1,5 +1,5 @@
 using System;
-
+using System.Diagnostics;
 using Teto.Debugging;
 using Teto.MMU;
 
@@ -125,49 +125,50 @@ public class CPU
         {
             case Opcode.NOP:
                 break;
-            
+    
             case Opcode.MOV:
-                _registers[reg] = mode == 0 ? value : _registers[value];
+                _registers[reg] = ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.MOVHI:
-                _registers[reg] = (_registers[reg] & 0xFFFF) | ((value & 0xFFFF) << 16);
+                _registers[reg] = (_registers[reg] & 0xFFFF) | ((ResolveMode(mode, value) & 0xFFFF) << 16);
                 break;
     
             case Opcode.MOVLO:
-                _registers[reg] = (int)(_registers[reg] & 0xFFFF0000) | (value & 0xFFFF);
+                _registers[reg] = (int)(_registers[reg] & 0xFFFF0000) | (ResolveMode(mode, value) & 0xFFFF);
                 break;
-            
+    
             case Opcode.LD:
-                _registers[reg] = _ram.Read(mode == 0 ? (uint)value : (uint)_registers[value]);
+                Debug.WriteLine($"LD: reg {reg}, mode {(InstrMode)mode} value {value} resolved to 0x{ResolveMode(mode, value):X8}");
+                _registers[reg] = _ram.ReadWord((uint)ResolveMode(mode, value));
                 break;
-            
+    
             case Opcode.ST:
-                _ram.Write(mode == 0 ? (uint)value : (uint)_registers[value], (byte)_registers[reg]);
+                _ram.WriteWord((uint)ResolveMode(mode, value), _registers[reg]);
                 break;
-            
+    
             case Opcode.LDHI:
-                var addrHi = mode == 0 ? (uint)value : (uint)_registers[value];
+                var addrHi = (uint)ResolveMode(mode, value);
                 _registers[reg] = (_registers[reg] & 0xFFFF) | ((_ram.Read(addrHi) | (_ram.Read(addrHi + 1) << 8)) << 16);
                 break;
-
+    
             case Opcode.LDLO:
-                var addrLo = mode == 0 ? (uint)value : (uint)_registers[value];
+                var addrLo = (uint)ResolveMode(mode, value);
                 _registers[reg] = (int)(_registers[reg] & 0xFFFF0000) | _ram.Read(addrLo) | (_ram.Read(addrLo + 1) << 8);
                 break;
-
+    
             case Opcode.STHI:
-                var addrHiSt = mode == 0 ? (uint)value : (uint)_registers[value];
+                var addrHiSt = (uint)ResolveMode(mode, value);
                 _ram.Write(addrHiSt, (byte)((_registers[reg] >> 16) & 0xFF));
                 _ram.Write(addrHiSt + 1, (byte)((_registers[reg] >> 24) & 0xFF));
                 break;
-
+    
             case Opcode.STLO:
-                var addrLoSt = mode == 0 ? (uint)value : (uint)_registers[value];
+                var addrLoSt = (uint)ResolveMode(mode, value);
                 _ram.Write(addrLoSt, (byte)(_registers[reg] & 0xFF));
                 _ram.Write(addrLoSt + 1, (byte)((_registers[reg] >> 8) & 0xFF));
                 break;
-            
+    
             case Opcode.PUSH:
                 StackPush(_registers[reg]);
                 break;
@@ -175,205 +176,218 @@ public class CPU
             case Opcode.POP:
                 _registers[reg] = StackPop();
                 break;
-            
+    
             case Opcode.XCHG:
                 var tmp = _registers[reg];
                 _registers[reg] = StackPop();
                 StackPush(tmp);
                 break;
-            
+    
             case Opcode.ADD:
-                _registers[reg] += mode == 0 ? value : _registers[value];
+                _registers[reg] += ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.SUB:
-                _registers[reg] -= mode == 0 ? value : _registers[value];
+                _registers[reg] -= ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.MUL:
-                _registers[reg] *= mode == 0 ? value : _registers[value];
+                _registers[reg] *= ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.DIV:
-                _registers[reg] /= mode == 0 ? value : _registers[value];
+                _registers[reg] /= ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.MOD:
-                _registers[reg] %= mode == 0 ? value : _registers[value];
+                _registers[reg] %= ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.INC:
                 _registers[reg]++;
                 break;
-            
+    
             case Opcode.DEC:
                 _registers[reg]--;
                 break;
-            
+    
             case Opcode.NEG:
                 _registers[reg] = ~_registers[reg] + 1;
                 break;
-            
+    
             case Opcode.FADD:
                 var f1 = BitConverter.Int32BitsToSingle(_registers[reg]);
-                var f2 = BitConverter.Int32BitsToSingle(mode == 0 ? value : _registers[value]);
+                var f2 = BitConverter.Int32BitsToSingle(ResolveMode(mode, value));
                 _registers[reg] = BitConverter.SingleToInt32Bits(f1 + f2);
                 break;
-            
+    
             case Opcode.FSUB:
                 f1 = BitConverter.Int32BitsToSingle(_registers[reg]);
-                f2 = BitConverter.Int32BitsToSingle(mode == 0 ? value : _registers[value]);
+                f2 = BitConverter.Int32BitsToSingle(ResolveMode(mode, value));
                 _registers[reg] = BitConverter.SingleToInt32Bits(f1 - f2);
                 break;
-            
+    
             case Opcode.FMUL:
                 f1 = BitConverter.Int32BitsToSingle(_registers[reg]);
-                f2 = BitConverter.Int32BitsToSingle(mode == 0 ? value : _registers[value]);
+                f2 = BitConverter.Int32BitsToSingle(ResolveMode(mode, value));
                 _registers[reg] = BitConverter.SingleToInt32Bits(f1 * f2);
                 break;
-            
+    
             case Opcode.FDIV:
                 f1 = BitConverter.Int32BitsToSingle(_registers[reg]);
-                f2 = BitConverter.Int32BitsToSingle(mode == 0 ? value : _registers[value]);
+                f2 = BitConverter.Int32BitsToSingle(ResolveMode(mode, value));
                 _registers[reg] = BitConverter.SingleToInt32Bits(f1 / f2);
                 break;
-            
+    
             case Opcode.FMOVHI:
                 var currentVal = _registers[reg];
-                var newHigh = (value & 0xFFFF) << 16;
+                var newHigh = (ResolveMode(mode, value) & 0xFFFF) << 16;
                 _registers[reg] = (currentVal & 0xFFFF) | newHigh;
                 break;
     
             case Opcode.FMOVLO:
                 currentVal = _registers[reg];
-                var newLow = value & 0xFFFF;
+                var newLow = ResolveMode(mode, value) & 0xFFFF;
                 _registers[reg] = (int)(currentVal & 0xFFFF0000) | newLow;
                 break;
-            
+    
             case Opcode.ITOF:
                 var intValue = _registers[reg];
                 var floatValue = (float)intValue;
                 _registers[value] = BitConverter.SingleToInt32Bits(floatValue);
                 break;
-
+    
             case Opcode.FTOI:
                 var fValue = BitConverter.Int32BitsToSingle(_registers[reg]);
                 _registers[value] = (int)fValue;
                 break;
-            
+    
             case Opcode.AND:
-                _registers[reg] &= mode == 0 ? value : _registers[value];
+                _registers[reg] &= ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.OR:
-                _registers[reg] |= mode == 0 ? value : _registers[value];
+                _registers[reg] |= ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.XOR:
-                _registers[reg] ^= mode == 0 ? value : _registers[value];
+                _registers[reg] ^= ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.NOT:
                 _registers[reg] = ~_registers[reg];
                 break;
-            
+    
             case Opcode.SHL:
-                _registers[reg] <<= mode == 0 ? value : _registers[value];
+                _registers[reg] <<= ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.SHR:
-                _registers[reg] >>= mode == 0 ? value : _registers[value];
+                _registers[reg] >>= ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.ROL:
-                var rolValue = mode == 0 ? value : _registers[value];
+                var rolValue = ResolveMode(mode, value);
                 rolValue %= 32;
                 _registers[reg] = (_registers[reg] << rolValue) | (_registers[reg] >> (32 - rolValue));
                 break;
-            
+    
             case Opcode.ROR:
-                var rorValue = mode == 0 ? value : _registers[value];
+                var rorValue = ResolveMode(mode, value);
                 rorValue %= 32;
                 _registers[reg] = (_registers[reg] >> rorValue) | (_registers[reg] << (32 - rorValue));
                 break;
-            
+    
             case Opcode.TEST:
-                Flags = (_registers[reg] & (mode == 0 ? value : _registers[value])) == 0 ? 1u : 0u;
+                Flags = (_registers[reg] & ResolveMode(mode, value)) == 0 ? 1u : 0u;
                 break;
-            
+    
             case Opcode.CMP:
-                Flags = _registers[reg] == (mode == 0 ? value : _registers[value]) ? 1u : 
-                         _registers[reg] > (mode == 0 ? value : _registers[value]) ? 2u : 0u;
+                var resolvedValue = ResolveMode(mode, value);
+                Flags = _registers[reg] == resolvedValue ? 1u :
+                        _registers[reg] > resolvedValue ? 2u : 0u;
                 break;
-            
+    
             case Opcode.JEQ:
                 if (Flags == 1)
-                    PC = mode == 0 ? value : _registers[value];
+                    PC = ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.JNE:
                 if (Flags != 1)
-                    PC = mode == 0 ? value : _registers[value];
+                    PC = ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.JGT:
                 if (Flags == 2)
-                    PC = mode == 0 ? value : _registers[value];
+                    PC = ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.JLT:
                 if (Flags == 0)
-                    PC = mode == 0 ? value : _registers[value];
+                    PC = ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.JGE:
                 if (Flags > 0)
-                    PC = mode == 0 ? value : _registers[value];
+                    PC = ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.JLE:
                 if (Flags < 2)
-                    PC = mode == 0 ? value : _registers[value];
+                    PC = ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.JMP:
-                PC = mode == 0 ? value : _registers[value];
+                PC = ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.JMPREL:
-                PC += mode == 0 ? value : _registers[value];
+                PC += ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.JMPX:
                 PC = value;
                 break;
-            
+    
             case Opcode.CALL:
                 StackPush(PC);
-                PC = mode == 0 ? value : _registers[value];
+                PC = ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.RET:
                 PC = StackPop();
                 break;
-            
+    
             case Opcode.ENTER:
                 StackPush(_registers[EBP]);
                 _registers[EBP] = _registers[ESP];
-                _registers[ESP] -= value;
+                _registers[ESP] -= ResolveMode(mode, value);
                 break;
-            
+    
             case Opcode.LEAVE:
                 _registers[ESP] = _registers[EBP];
                 _registers[EBP] = StackPop();
                 break;
-            
+    
             case Opcode.HLT:
                 Halted = true;
                 break;
-            
+    
             default:
                 throw new InvalidOperationException($"Unknown opcode: {opcode}");
         }
+    }
+    
+    private int ResolveMode(int mode, int value) {
+        return mode switch
+        {
+            0 or 1 => value,                                // immediate
+            2 => _registers[value],                         // register value as address
+            3 => Segments.HeapStart + value,                // heap offset
+            >= 4 and <= 9 => _registers[mode - 4] + value,  // register offset
+            10 or 11 => _registers[mode - 4] - value,       // stack offset
+            _ => throw new InvalidOperationException($"Unknown addressing mode: {mode}")
+        };
     }
 }

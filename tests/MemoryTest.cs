@@ -21,33 +21,32 @@ public class MemoryTest
     public void StoreAndLoad_ShouldWorkCorrectly()
     {
         var program = new List<byte>();
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, 0x0, 0x0, 0x5));
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, 0x1, 0x0, 0x3));
-        program.AddRange(Utils.EncodeInstruction(Opcode.ADD, 0x0, 0x1, 0x1));
-        program.AddRange(Utils.EncodeInstruction(Opcode.ST, 0x0, 0x1, 0x1));
-        program.AddRange(Utils.EncodeInstruction(Opcode.LD, 0x3, 0x0, 0x3));
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EAX, InstrMode.IMM, 0x5));
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EBX, InstrMode.IMM, 0x3));
+        program.AddRange(Utils.EncodeInstruction(Opcode.ADD, CPU.EAX, InstrMode.REG, CPU.EBX));
+        program.AddRange(Utils.EncodeInstruction(Opcode.ST, CPU.EAX, InstrMode.MEM, 0x1000));
+        program.AddRange(Utils.EncodeInstruction(Opcode.LD, CPU.ECX, InstrMode.MEM, 0x1000));
         program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0x0));
         
         _ram.LoadProgram(program.ToArray());
         _cpu.Run();
         
-        Assert.Equal(8, _cpu.GetRegister(0));
-        Assert.Equal(3, _cpu.GetRegister(1));
-        Assert.Equal(8, _cpu.GetRegister(3));
+        Assert.Equal(0x8, _cpu.GetRegister(CPU.ECX));
+        Assert.Equal(0x8, _ram.ReadWord(0x1000));
     }
     
     [Fact]
     public void LoadStoreHighLow_ShouldHandleMemoryOperations()
     {
         var program = new List<byte>();
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOVHI, CPU.EAX, 0x0, 0x1234)); 
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOVLO, CPU.EAX, 0x0, 0x5678));
-        program.AddRange(Utils.EncodeInstruction(Opcode.STLO, CPU.EAX, 0x0, 0x100));
-        program.AddRange(Utils.EncodeInstruction(Opcode.STHI, CPU.EAX, 0x0, 0x102));
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EBX, 0x0, 0));
-        program.AddRange(Utils.EncodeInstruction(Opcode.LDLO, CPU.EBX, 0x0, 0x100));
-        program.AddRange(Utils.EncodeInstruction(Opcode.LDHI, CPU.EBX, 0x0, 0x102));
-        program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0));          
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOVHI, CPU.EAX, InstrMode.IMM, 0x1234)); 
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOVLO, CPU.EAX, InstrMode.IMM, 0x5678));
+        program.AddRange(Utils.EncodeInstruction(Opcode.STLO, CPU.EAX, InstrMode.MEM, 0x1000));
+        program.AddRange(Utils.EncodeInstruction(Opcode.STHI, CPU.EAX, InstrMode.MEM, 0x1002));
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EBX, InstrMode.IMM, 0));
+        program.AddRange(Utils.EncodeInstruction(Opcode.LDLO, CPU.EBX, InstrMode.MEM, 0x1000));
+        program.AddRange(Utils.EncodeInstruction(Opcode.LDHI, CPU.EBX, InstrMode.MEM, 0x1002));
+        program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0));     
 
         _ram.LoadProgram(program.ToArray());
         _cpu.Run();
@@ -60,12 +59,12 @@ public class MemoryTest
     public void LoadStoreHighLow_ShouldPreserveOtherBits()
     {
         var program = new List<byte>();
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOVHI, CPU.EAX, 0x0, 0xAABB)); 
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOVLO, CPU.EAX, 0x0, 0xCCDD));
-        program.AddRange(Utils.EncodeInstruction(Opcode.STHI, CPU.EAX, 0x0, 0x100));
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOVHI, CPU.EBX, 0x0, 0x0000));
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOVLO, CPU.EBX, 0x0, 0xFFFF));
-        program.AddRange(Utils.EncodeInstruction(Opcode.LDHI, CPU.EBX, 0x0, 0x100));
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOVHI, CPU.EAX, InstrMode.IMM, 0xAABB)); 
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOVLO, CPU.EAX, InstrMode.IMM, 0xCCDD));
+        program.AddRange(Utils.EncodeInstruction(Opcode.STHI, CPU.EAX, InstrMode.MEM, 0x1000));
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOVHI, CPU.EBX, InstrMode.IMM, 0x0000));
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOVLO, CPU.EBX, InstrMode.IMM, 0xFFFF));
+        program.AddRange(Utils.EncodeInstruction(Opcode.LDHI, CPU.EBX, InstrMode.MEM, 0x1000));
         program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0));
 
         _ram.LoadProgram(program.ToArray());

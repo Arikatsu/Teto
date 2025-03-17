@@ -4,11 +4,11 @@ namespace Teto;
 
 public static class Utils
 {
-    public static byte[] EncodeInstruction(Opcode opcode, byte reg, byte mode, int operand)
+    public static byte[] EncodeInstruction(Opcode opcode, byte reg, InstrMode mode, int operand)
     {
         var instruction = ((byte)opcode & 0xFF)           // 8-bit opcode
                           | ((reg & 0xF) << 8)               // 4-bit register
-                          | ((mode & 0xF) << 12)             // 4-bit mode
+                          | (((byte)mode & 0xF) << 12)             // 4-bit mode
                           | ((operand & 0xFFFF) << 16);      // 16-bit operand
     
         return

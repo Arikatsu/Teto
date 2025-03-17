@@ -20,9 +20,9 @@ public class ArithmeticTests
     public void TwosComplementArithmetic_ShouldWorkCorrectly()
     {
         var program = new List<byte>();
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EAX, 0x0, -5));
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EBX, 0x0, -3));
-        program.AddRange(Utils.EncodeInstruction(Opcode.ADD, CPU.EAX, 0x1, CPU.EBX));
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EAX, InstrMode.IMM, -5));
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EBX, InstrMode.IMM, -3));
+        program.AddRange(Utils.EncodeInstruction(Opcode.ADD, CPU.EAX, InstrMode.REG, CPU.EBX));
         program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0));
 
         _ram.LoadProgram(program.ToArray());
@@ -33,10 +33,10 @@ public class ArithmeticTests
         _ram.Clear();
         _cpu.Reset();
 
-        program = new List<byte>();
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EAX, 0x0, -5));
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EBX, 0x0, -3));
-        program.AddRange(Utils.EncodeInstruction(Opcode.SUB, CPU.EAX, 0x1, CPU.EBX));
+        program = [];
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EAX, InstrMode.IMM, -5));
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EBX, InstrMode.IMM, -3));
+        program.AddRange(Utils.EncodeInstruction(Opcode.SUB, CPU.EAX, InstrMode.REG, CPU.EBX));
         program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0));
 
         _ram.LoadProgram(program.ToArray());
@@ -47,10 +47,10 @@ public class ArithmeticTests
         _ram.Clear();
         _cpu.Reset();
 
-        program = new List<byte>();
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EAX, 0x0, -5));
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EBX, 0x0, -3));
-        program.AddRange(Utils.EncodeInstruction(Opcode.MUL, CPU.EAX, 0x1, CPU.EBX));
+        program = [];
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EAX, InstrMode.IMM, -5));
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EBX, InstrMode.IMM, -3));
+        program.AddRange(Utils.EncodeInstruction(Opcode.MUL, CPU.EAX, InstrMode.REG, CPU.EBX));
         program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0));
 
         _ram.LoadProgram(program.ToArray());
@@ -61,10 +61,10 @@ public class ArithmeticTests
         _ram.Clear();
         _cpu.Reset();
 
-        program = new List<byte>();
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EAX, 0x0, -5));
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EBX, 0x0, -3));
-        program.AddRange(Utils.EncodeInstruction(Opcode.DIV, CPU.EAX, 0x1, CPU.EBX));
+        program = [];
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EAX, InstrMode.IMM, -5));
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EBX, InstrMode.IMM, -3));
+        program.AddRange(Utils.EncodeInstruction(Opcode.DIV, CPU.EAX, InstrMode.REG, CPU.EBX));
         program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0));
 
         _ram.LoadProgram(program.ToArray());
@@ -75,10 +75,10 @@ public class ArithmeticTests
         _ram.Clear();
         _cpu.Reset();
 
-        program = new List<byte>();
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EAX, 0x0, -5));
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EBX, 0x0, -3));
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOD, CPU.EAX, 0x1, CPU.EBX));
+        program = [];
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EAX, InstrMode.IMM, -5));
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EBX, InstrMode.IMM, -3));
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOD, CPU.EAX, InstrMode.REG, CPU.EBX));
         program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0));
 
         _ram.LoadProgram(program.ToArray());
@@ -95,11 +95,11 @@ public class ArithmeticTests
         //
 
         var program = new List<byte>();
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EAX, 0x0, 0x0FDB));
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EAX, 0x0, 0x4049));
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EBX, 0x0, 0x0000));
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EBX, 0x0, 0x3F80));
-        program.AddRange(Utils.EncodeInstruction(Opcode.FADD, CPU.EAX, 0x1, CPU.EBX));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EAX, InstrMode.IMM, 0x0FDB));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EAX, InstrMode.IMM, 0x4049));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EBX, InstrMode.IMM, 0x0000));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EBX, InstrMode.IMM, 0x3F80));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FADD, CPU.EAX, InstrMode.REG, CPU.EBX));
         program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0));
 
         _ram.LoadProgram(program.ToArray());
@@ -110,13 +110,13 @@ public class ArithmeticTests
         _ram.Clear();
         _cpu.Reset();
 
-        program = new List<byte>();
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EAX, 0x0, 0x0FDB));
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EAX, 0x0, 0x4049));
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EBX, 0x0, 0x0000));
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EBX, 0x0, 0x3F80));
+        program = [];
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EAX, InstrMode.IMM, 0x0FDB));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EAX, InstrMode.IMM, 0x4049));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EBX, InstrMode.IMM, 0x0000));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EBX, InstrMode.IMM, 0x3F80));
 
-        program.AddRange(Utils.EncodeInstruction(Opcode.FSUB, CPU.EAX, 0x1, CPU.EBX));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FSUB, CPU.EAX, InstrMode.REG, CPU.EBX));
         program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0));
 
         _ram.LoadProgram(program.ToArray());
@@ -127,13 +127,13 @@ public class ArithmeticTests
         _ram.Clear();
         _cpu.Reset();
 
-        program = new List<byte>();
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EAX, 0x0, 0x0FDB));
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EAX, 0x0, 0x4049));
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EBX, 0x0, 0x0000));
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EBX, 0x0, 0x4000));
+        program = [];
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EAX, InstrMode.IMM, 0x0FDB));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EAX, InstrMode.IMM, 0x4049));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EBX, InstrMode.IMM, 0x0000));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EBX, InstrMode.IMM, 0x4000));
 
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMUL, CPU.EAX, 0x1, CPU.EBX));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMUL, CPU.EAX, InstrMode.REG, CPU.EBX));
         program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0));
 
         _ram.LoadProgram(program.ToArray());
@@ -144,12 +144,12 @@ public class ArithmeticTests
         _ram.Clear();
         _cpu.Reset();
 
-        program = new List<byte>();
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EAX, 0x0, 0x0FDB));
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EAX, 0x0, 0x4049));
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EBX, 0x0, 0x0000));
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EBX, 0x0, 0x4000));
-        program.AddRange(Utils.EncodeInstruction(Opcode.FDIV, CPU.EAX, 0x1, CPU.EBX));
+        program = [];
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EAX, InstrMode.IMM, 0x0FDB));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EAX, InstrMode.IMM, 0x4049));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EBX, InstrMode.IMM, 0x0000));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EBX, InstrMode.IMM, 0x4000));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FDIV, CPU.EAX, InstrMode.REG, CPU.EBX));
         program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0));
 
         _ram.LoadProgram(program.ToArray());
@@ -162,11 +162,11 @@ public class ArithmeticTests
     public void FloatingPointArithmetic_ShouldHandleNegativeValues()
     {
         var program = new List<byte>();
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EAX, 0x0, 0x0FDB)); // 3.14159
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EAX, 0x0, 0x4049));
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EBX, 0x0, 0x0001)); // -1.0
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EBX, 0x0, 0xBF80));
-        program.AddRange(Utils.EncodeInstruction(Opcode.FADD, CPU.EAX, 0x1, CPU.EBX)); // 3.14159 + -1.0
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EAX, InstrMode.IMM, 0x0FDB)); // 3.14159
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EAX, InstrMode.IMM, 0x4049));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EBX, InstrMode.IMM, 0x0001)); // -1.0
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EBX, InstrMode.IMM, 0xBF80));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FADD, CPU.EAX, InstrMode.REG, CPU.EBX)); // 3.14159 + -1.0
         program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0));
 
         _ram.LoadProgram(program.ToArray());
@@ -179,9 +179,9 @@ public class ArithmeticTests
     public void FtoI_ItoF_ShouldWorkCorrectly()
     {
         var program = new List<byte>();
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EAX, 0x0, 0x0001)); // 1.0
-        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EAX, 0x0, 0x3F80));
-        program.AddRange(Utils.EncodeInstruction(Opcode.FTOI, CPU.EAX, 0x1, CPU.EBX)); // Convert to int
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVLO, CPU.EAX, InstrMode.IMM, 0x0001)); // 1.0
+        program.AddRange(Utils.EncodeInstruction(Opcode.FMOVHI, CPU.EAX, InstrMode.IMM, 0x3F80));
+        program.AddRange(Utils.EncodeInstruction(Opcode.FTOI, CPU.EAX, InstrMode.REG, CPU.EBX)); // Convert to int
         program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0));
 
         _ram.LoadProgram(program.ToArray());
@@ -192,9 +192,9 @@ public class ArithmeticTests
         _ram.Clear();
         _cpu.Reset();
 
-        program = new List<byte>();
-        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EAX, 0x0, 1)); // 1
-        program.AddRange(Utils.EncodeInstruction(Opcode.ITOF, CPU.EAX, 0x1, CPU.EBX)); // Convert to float
+        program = [];
+        program.AddRange(Utils.EncodeInstruction(Opcode.MOV, CPU.EAX, InstrMode.IMM, 1)); // 1
+        program.AddRange(Utils.EncodeInstruction(Opcode.ITOF, CPU.EAX, InstrMode.REG, CPU.EBX)); // Convert to float
         program.AddRange(Utils.EncodeInstruction(Opcode.HLT, 0x0, 0x0, 0));
 
         _ram.LoadProgram(program.ToArray());
